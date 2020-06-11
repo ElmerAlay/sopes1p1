@@ -17,9 +17,9 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Escribir informacion de los procesos del cpu");
 MODULE_AUTHOR("Elmer Edgardo Alay Yupe - 201212945");
 
-struct tty_struct *my_tty = NULL;
-static char buf[MAX_BUF_SIZE];
-static struct task_struct *simple_tsk = NULL;
+struct list_head *list;
+struct task_struct *task_child;
+struct task_struct *iter;
 
 static int escribir_archivo(struct seq_file * archivo, void *v)
 {
@@ -31,14 +31,20 @@ static int escribir_archivo(struct seq_file * archivo, void *v)
     seq_printf(archivo, "\n");
 
     int cnt = 0;
-    struct task_struct *iter;
     for_each_process(iter)
     {
-        seq_printf(archivo, "PID:%d - NOMBRE:%s - Estado:%l\n", iter->pid, iter->group_leader->comm, iter->state);
+        seq_printf(archivo, "Padre PID:%d - NOMBRE:%s - Estado:%ld\n", iter->pid, iter->comm, iter->state);
+
+        list_for_each(list, &iter->children)
+        {
+            task_child = list_entry(list, struct task_struct, sibling);
+            seq_printf(archivo, " -Hijo de %s[%d] PID:%d - NOMBRE:%s - Estado:%ld\n", iter->comm, iter->pid, task_child->pid, task_child->comm, task_child->state);
+        }
+
         cnt++;
     }
 
-    seq_printf(archivo, "Processes: %d", cnt);
+    seq_printf(archivo, "Número de procesos: %d\n", cnt);
     return 0;
 }
 
