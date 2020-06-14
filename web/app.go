@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -12,6 +13,7 @@ import (
 type memStruct struct {
 	Total_mem int
 	Free_mem  int
+	Porcent   int
 }
 
 type cpuinfo struct {
@@ -22,10 +24,14 @@ type cpuinfo struct {
 	Ram   string
 }
 
+type rend struct {
+	CPU string
+}
+
 func main() {
 	http.HandleFunc("/memoria", ramInfo)
 	http.HandleFunc("/", cpu)
-	http.HandleFunc("/", rendcpu)
+	http.HandleFunc("/cpu", rendcpu)
 	http.ListenAndServe(":3000", nil)
 }
 
@@ -47,8 +53,9 @@ func ramInfo(w http.ResponseWriter, r *http.Request) {
 	if err1 == nil && err2 == nil {
 		ramTotalMB := ramTotalKB / 1024
 		ramFreeMB := ramFreeKB / 1024
+		porcentaje := ((ramTotalMB - ramFreeMB) * 100) / ramTotalMB
 
-		memResponse := memStruct{ramTotalMB, ramFreeMB}
+		memResponse := memStruct{ramTotalMB, ramFreeMB, porcentaje}
 		jsonResponse, errorjson := json.Marshal(memResponse)
 		if errorjson != nil {
 			http.Error(w, errorjson.Error(), http.StatusInternalServerError)
@@ -155,36 +162,21 @@ func cpu(w http.ResponseWriter, r *http.Request) {
 }
 
 func rendcpu(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadFile("/proc/meminfo")
-	if err != nil {
-		return
+	cmd := exec.Command("bash", "-c", "top -bn1 | awk '/Cpu/ { cpu = 100 - $8 }; END { print cpu }'")
+	b, e := cmd.Output()
+	if e != nil {
+		log.Printf("failed due to :%vn", e)
+		panic(e)
 	}
 
-	str := string(b)
-	listaInfo := strings.Split(string(str), "\n")
-
-	memoriaTotal := strings.Replace((listaInfo[0])[10:24], " ", "", -1)
-	memoriaLibre := strings.Replace((listaInfo[1])[10:24], " ", "", -1)
-
-	ramTotalKB, err1 := strconv.Atoi(memoriaTotal)
-	ramFreeKB, err2 := strconv.Atoi(memoriaLibre)
-
-	if err1 == nil && err2 == nil {
-		ramTotalMB := ramTotalKB / 1024
-		ramFreeMB := ramFreeKB / 1024
-
-		memResponse := memStruct{ramTotalMB, ramFreeMB}
-		jsonResponse, errorjson := json.Marshal(memResponse)
-		if errorjson != nil {
-			http.Error(w, errorjson.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.WriteHeader(http.StatusOK)
-		w.Write(jsonResponse)
-	} else {
+	rendimiento := rend{CPU: string(b)[0 : len(string(b))-1]}
+	jsonResponse, errorjson := json.Marshal(rendimiento)
+	if errorjson != nil {
+		http.Error(w, errorjson.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResponse)
 }
