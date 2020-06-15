@@ -2,6 +2,7 @@ var formulario = document.getElementById('formulario');
 var traduccion = document.getElementById('c3d');
 var campos = document.getElementById('campos');
 var cabecera= document.getElementById('cabecera');
+var formulario = document.getElementById('formulario');
 
 var existe = false;
 var url = "http://localhost:3000/";
@@ -51,4 +52,26 @@ function eliminar(id){
             })
             .then(function() {});
     
+}
+
+formulario.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    var datos = new FormData(formulario);
+    var pid = datos.get('pid');
+
+    postUser(pid);
+})
+
+function postUser(pid) {
+    axios.post(url + 'kill/', {
+            Pid: pid
+        })
+        .then(function(response) {
+            console.log(response);
+        })
+        .catch(function(error) {
+            console.log(error);
+        })
+        .then(function() {});
 }
