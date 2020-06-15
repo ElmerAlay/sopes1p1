@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Resumen CPU</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+                                    
+        <link rel="stylesheet" type="text/css" href="./Errores/vendor/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="./Errores/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="./Errores/vendor/animate/animate.css">
+        <link rel="stylesheet" type="text/css" href="./Errores/vendor/select2/select2.min.css">
+        <link rel="stylesheet" type="text/css" href="./Errores/vendor/perfect-scrollbar/perfect-scrollbar.css">
+        <link rel="stylesheet" type="text/css" href="./Errores/css/util.css">
+        <link rel="stylesheet" type="text/css" href="./Errores/css/main.css">
+    </head>
+   
+    <body>
+        <div class="limiter">
+            <div class="container-table100">
+                <div class="wrap-table100">
+                    <div class="table100">
+                        <h1 align=center >Procesos del CPU</h1>
+                        <br>
+                        <div id="cabecera">
+
+                        </div>
+                        <div class="container row">
+                            <div class="column">
+                                <a class="btn btn-info" href="ram.html">RAM</a>
+                            </div>
+                            <div class="column">
+                                <a class="btn btn-info" href="cpu.html">CPU</a>
+                            </div>
+                        </div>
+                        <br>
+                        <table>
+                            <thead>
+                                <tr class="table100-head">
+                                    <th class="column1">PID</th>
+                                    <th class="column2">Nombre</th>
+                                    <th class="column3">Usuario</th>
+                                    <th class="column4">Estado</th>
+                                    <th class="column6">%RAM</th>
+                                    <th class="column6">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="campos">
+                            </tbody>
+                        </table>
+                    </div>
+            	</div>
+            </div>
+        </div>
+            
+        <script src="./Errores/vendor/jquery/jquery-3.2.1.min.js"></script>
+        <script src="./Errores/vendor/bootstrap/js/popper.js"></script>
+        <script src="./Errores/vendor/bootstrap/js/bootstrap.min.js"></script>
+        <script src="./Errores/vendor/select2/select2.min.js"></script>
+        <script src="./Errores/js/main.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="./user.js"></script>
+    </body>
+</html>

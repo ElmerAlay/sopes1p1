@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 type memStruct struct {
@@ -29,10 +32,13 @@ type rend struct {
 }
 
 func main() {
-	http.HandleFunc("/memoria", ramInfo)
-	http.HandleFunc("/", cpu)
-	http.HandleFunc("/cpu", rendcpu)
-	http.ListenAndServe(":3000", nil)
+	router := mux.NewRouter()
+
+	router.HandleFunc("/memoria", ramInfo).Methods("GET")
+	router.HandleFunc("/", cpu).Methods("GET")
+	router.HandleFunc("/cpu", rendcpu).Methods("GET")
+	router.HandleFunc("/kill", deleteProcess).Methods("POST")
+	log.Fatal(http.ListenAndServe(":3000", router))
 }
 
 func ramInfo(w http.ResponseWriter, r *http.Request) {
@@ -179,4 +185,34 @@ func rendcpu(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResponse)
+}
+
+type respuesta struct {
+	Pid string
+}
+
+func deleteProcess(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	var u respuesta
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		return
+	}
+
+	cmd := exec.Command("bash", "-c", "kill -9 "+u.Pid)
+	b, e := cmd.Output()
+	if e != nil {
+		log.Printf("failed due to :%vn", e)
+		panic(e)
+	}
+
+	fmt.Println(b)
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
